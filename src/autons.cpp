@@ -10,14 +10,14 @@
 
 void default_constants() {
     // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI).
-    chassis.set_drive_constants(10, 1.5, 0, 10, 0);
-    chassis.set_heading_constants(6, .4, 0, 1, 0);
-    chassis.set_turn_constants(12, .4, .03, 3, 15);
+    chassis.set_drive_constants(10, 2, 0, 10, 0);
+    chassis.set_heading_constants(6, 1.2, 0, 1, 0);
+    chassis.set_turn_constants(7, .2, 0, 1.3, 0);
     chassis.set_swing_constants(12, .3, .001, 2, 15);
 
     // Each exit condition set is in the form of (settle_error, settle_time, timeout).
     chassis.set_drive_exit_conditions(1.5, 300, 5000);
-    chassis.set_turn_exit_conditions(1, 300, 3000);
+    chassis.set_turn_exit_conditions(0.5, 100, 1000);
     chassis.set_swing_exit_conditions(1, 300, 3000);
 }
 
@@ -26,9 +26,8 @@ void default_constants() {
  * For functions like drive_to_point(), it's often better to have
  * a slower max_voltage and greater settle_error than you would otherwise.
  */
-
 void odom_constants() {
-    default_constants();
+    default_constants(); 
     chassis.heading_max_voltage = 10;
     chassis.drive_max_voltage = 8;
     chassis.drive_settle_error = 3;
@@ -36,27 +35,107 @@ void odom_constants() {
     chassis.drive_min_voltage = 0;
 }
 
-/**
- * The expected behavior is to return to the start position.
- */
+void mogo_drop_threadF() {
+  wait(750, msec);
+  Clamp.toggle();
+};
 
-void drive_test() {
-    chassis.drive_distance(2);
-    //   chassis.drive_distance(12);
-    //   chassis.drive_distance(18);
-    //   chassis.drive_distance(-36);
+void red_auton_period() {
+  //  1 tile =8.4,8.2
+
+    // Mogo
+    chassis.drive_distance(-9.4);
+    // wait(100, msec);
+    Clamp.toggle();
+
+    // 2nd Ring
+    Intake.spin(fwd, 100, percent);
+    wait(100, msec);
+    chassis.turn_settle_time = 200;
+    chassis.turn_to_angle(85);
+    chassis.drive_distance(5);
+    chassis.turn_settle_time = 100;
+
+    // 3rd Ring
+    chassis.turn_to_angle(150);
+    chassis.drive_distance(5);
+    wait(150, msec);
+    
+    // Align & Perform long distance drive
+    Intake.stop();
+    chassis.drive_distance(-9.75);
+    Intake.spin(fwd, 100, percent);
+    wait(100, msec);
+    chassis.turn_to_angle(240);
+
+    vex::thread mogoDropThread(mogo_drop_threadF);
+    chassis.drive_max_voltage = 12;
+    chassis.drive_distance(26);
+    chassis.drive_max_voltage = 10;
+
+    // chassis.turn_to_angle(150);
+    // chassis.drive_distance(-3);
+    // Clamp.toggle();
+    // chassis.drive_distance(3);
+    chassis.turn_to_angle(290);
+    chassis.drive_distance(-6);
+    Clamp.toggle();
+    chassis.turn_to_angle(240);
+    Intake.spin(fwd, 100, pct);
+    chassis.drive_distance(5);
+    chassis.turn_timeout = 1000;
+    chassis.turn_to_angle(120);
+    chassis.drive_distance(8);
+    Intake.stop();
 }
 
-/**
- * The expected behavior is to return to the start angle, after making a complete turn.
- */
+void blue_auton_period() {
+    //  1 tile =8.4,8.2
 
-void turn_test() {
-    chassis.turn_to_angle(5);
-    chassis.turn_to_angle(30);
-    chassis.turn_to_angle(90);
-    chassis.turn_to_angle(225);
-    chassis.turn_to_angle(0);
+    // Mogo
+    chassis.drive_distance(-9.4);
+    // wait(100, msec);
+    Clamp.toggle();
+
+    // 2nd Ring
+    Intake.spin(fwd, 100, percent);
+    wait(100, msec);
+    chassis.turn_settle_time = 200;
+    chassis.turn_to_angle(-85);
+    chassis.drive_distance(5);
+    chassis.turn_settle_time = 100;
+
+    // 3rd Ring
+    chassis.turn_to_angle(-150);
+    chassis.drive_distance(5);
+    wait(150, msec);
+    
+    // Align & Perform long distance drive
+    Intake.stop();
+    chassis.drive_distance(-9.75);
+    Intake.spin(fwd, 100, percent);
+    wait(100, msec);
+    chassis.turn_to_angle(-240);
+
+    vex::thread mogoDropThread(mogo_drop_threadF);
+    chassis.drive_max_voltage = 12;
+    chassis.drive_distance(26);
+    chassis.drive_max_voltage = 10;
+
+    // chassis.turn_to_angle(150);
+    // chassis.drive_distance(-3);
+    // Clamp.toggle();
+    // chassis.drive_distance(3);
+    chassis.turn_to_angle(-290);
+    chassis.drive_distance(-6);
+    Clamp.toggle();
+    chassis.turn_to_angle(-240);
+    Intake.spin(fwd, 100, pct);
+    chassis.drive_distance(5);
+    chassis.turn_timeout = 1000;
+    chassis.turn_to_angle(-120);
+    chassis.drive_distance(8);
+    Intake.stop();
 }
 
 /**
@@ -91,7 +170,7 @@ void odom_test() {
     chassis.set_coordinates(0, 0, 0);
     while (1) {
         Brain.Screen.clearScreen();
-        Brain.Screen.printAt(5, 20, "X: %f", chassis.get_X_position());
+        Brain.Screen.printAt(5, 20, "Left: %f", chassis.get_X_position());
         Brain.Screen.printAt(5, 40, "Y: %f", chassis.get_Y_position());
         Brain.Screen.printAt(5, 60, "Heading: %f", chassis.get_absolute_heading());
         Brain.Screen.printAt(5, 80, "ForwardTracker: %f", chassis.get_ForwardTracker_position());

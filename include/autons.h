@@ -7,8 +7,8 @@ extern Drive chassis;
 
 void default_constants();
 
-void drive_test();
-void turn_test();
+void red_auton_period();
+void blue_auton_period();
 void swing_test();
 void full_test();
 void odom_test();

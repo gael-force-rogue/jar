@@ -48,6 +48,16 @@ class Piston {
     }
 };
 
+class Intake : public vex::motor {
+    void forward() {
+      this->spin(fwd, 100, pct);
+    }
+
+    void backward() {
+      this->spin(fwd, 100, pct);
+    }
+};
+
 extern Piston Clamp;
 extern Piston Hang;
 extern Piston Knocker;

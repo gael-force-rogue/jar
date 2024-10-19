@@ -103,7 +103,7 @@ Drive chassis(
     // Sideways tracker center distance (positive distance is behind the center of the robot, negative is in front):
     0);
 
-int current_auton_selection = 0;
+int current_auton_selection = 2;
 bool auto_started = false;
 
 /**
@@ -117,6 +117,7 @@ void pre_auton() {
     // Initializing Robot Configuration. DO NOT REMOVE!
     vexcodeInit();
     default_constants();
+    
 
     while (!auto_started) {
         Brain.Screen.clearScreen();
@@ -126,35 +127,9 @@ void pre_auton() {
         Brain.Screen.printAt(5, 80, "Chassis Heading Reading:");
         Brain.Screen.printAt(5, 100, "%f", chassis.get_absolute_heading());
         Brain.Screen.printAt(5, 120, "Selected Auton:");
-        switch (current_auton_selection) {
-            case 0:
-                Brain.Screen.printAt(5, 140, "Auton 1");
-                break;
-            case 1:
-                Brain.Screen.printAt(5, 140, "Auton 2");
-                break;
-            case 2:
-                Brain.Screen.printAt(5, 140, "Auton 3");
-                break;
-            case 3:
-                Brain.Screen.printAt(5, 140, "Auton 4");
-                break;
-            case 4:
-                Brain.Screen.printAt(5, 140, "Auton 5");
-                break;
-            case 5:
-                Brain.Screen.printAt(5, 140, "Auton 6");
-                break;
-            case 6:
-                Brain.Screen.printAt(5, 140, "Auton 7");
-                break;
-            case 7:
-                Brain.Screen.printAt(5, 140, "Auton 8");
-                break;
-        }
+        Brain.Screen.printAt(5, 140, "Auton %f", current_auton_selection + 1);
         if (Brain.Screen.pressing()) {
-            while (Brain.Screen.pressing()) {
-            }
+            while (Brain.Screen.pressing()) {};
             current_auton_selection++;
         } else if (current_auton_selection == 8) {
             current_auton_selection = 0;
@@ -174,13 +149,13 @@ void autonomous(void) {
     auto_started = true;
     switch (current_auton_selection) {
         case 0:
-            drive_test();
+            red_auton_period();
             break;
         case 1:
-            drive_test();
+            red_auton_period();
             break;
         case 2:
-            turn_test();
+            blue_auton_period();
             break;
         case 3:
             swing_test();

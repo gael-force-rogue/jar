@@ -1,5 +1,7 @@
 #include "vex.h"
 
+#include <iostream>
+
 /**
  * Drive constructor for the chassis.
  * Even though there's only one constructor, there can be
@@ -267,6 +269,7 @@ void Drive::turn_to_angle(float angle, float turn_max_voltage, float turn_settle
     while (!turnPID.is_settled()) {
         float error = reduce_negative_180_to_180(angle - get_absolute_heading());
         float output = turnPID.compute(error);
+        // std::cout << "Error: " << error << std::endl;
         output = clamp(output, -turn_max_voltage, turn_max_voltage);
         drive_with_voltage(output, -output);
         task::sleep(10);
@@ -692,8 +695,8 @@ void Drive::holonomic_drive_to_pose(float X_position, float Y_position, float an
  */
 
 void Drive::control_arcade() {
-    float throttle = deadband(controller(primary).Axis1.value(), 5);
-    float turn = deadband(controller(primary).Axis3.value(), 5);
+    float throttle = deadband(controller(primary).Axis3.value(), 5);
+    float turn = deadband(controller(primary).Axis1.value(), 5);
     DriveL.spin(fwd, to_volt(throttle + turn), volt);
     DriveR.spin(fwd, to_volt(throttle - turn), volt);
 }
