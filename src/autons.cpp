@@ -40,8 +40,13 @@ void mogo_drop_threadF() {
   Clamp.toggle();
 };
 
-void red_auton_period() {
-  //  1 tile =8.4,8.2
+void intake_stop_threadF() {
+  wait(1500, msec);
+  Intake.stop();
+}
+
+void red_auton_period_old() {
+    //  1 tile =8.4,8.2
 
     // Mogo
     chassis.drive_distance(-9.4);
@@ -89,6 +94,55 @@ void red_auton_period() {
     Intake.stop();
 }
 
+void red_auton_period() {
+  //  1 tile =8.4,8.2
+
+    // Mogo
+    chassis.drive_distance(-9.4);
+    // wait(100, msec);
+    Clamp.toggle();
+
+    // 2nd Ring
+    Intake.spin(fwd, 100, percent);
+    chassis.turn_to_angle(80);
+    chassis.drive_distance(5);
+
+    // 3rd Ring
+    chassis.turn_to_angle(150);
+    chassis.drive_distance(5);
+    wait(150, msec);
+    
+    // Align & Perform long distance drive
+    vex::thread intakeStopThread(intake_stop_threadF);
+    chassis.drive_distance(-9.75);
+    chassis.drive_stop(brake);
+    // Intake.spin(fwd, 100, percent);
+    // wait(1000, msec);
+    // Intake.stop();
+    // chassis.turn_to_angle(240);
+
+    // vex::thread mogoDropThread(mogo_drop_threadF);
+    // chassis.drive_max_voltage = 12;
+    // chassis.drive_distance(26);
+    // chassis.drive_max_voltage = 10;
+
+    // // chassis.turn_to_angle(150);
+    // // chassis.drive_distance(-3);
+    // // Clamp.toggle();
+    // // chassis.drive_distance(3);
+    // chassis.turn_to_angle(290);
+    // chassis.drive_distance(-6);
+    // Clamp.toggle();
+    // chassis.turn_to_angle(240);
+    // Intake.spin(fwd, 100, pct);
+    // chassis.drive_distance(5);
+    // chassis.turn_timeout = 1000;
+    // chassis.turn_to_angle(120);
+    // chassis.drive_max_voltage = 12;
+    // chassis.drive_distance(10);
+    // Intake.stop();
+}
+
 void blue_auton_period() {
     //  1 tile =8.4,8.2
 
@@ -99,11 +153,8 @@ void blue_auton_period() {
 
     // 2nd Ring
     Intake.spin(fwd, 100, percent);
-    wait(100, msec);
-    chassis.turn_settle_time = 200;
-    chassis.turn_to_angle(-85);
+    chassis.turn_to_angle(-80);
     chassis.drive_distance(5);
-    chassis.turn_settle_time = 100;
 
     // 3rd Ring
     chassis.turn_to_angle(-150);
@@ -111,7 +162,7 @@ void blue_auton_period() {
     wait(150, msec);
     
     // Align & Perform long distance drive
-    Intake.stop();
+    vex::thread intakeStopThread(intake_stop_threadF);
     chassis.drive_distance(-9.75);
     Intake.spin(fwd, 100, percent);
     wait(100, msec);
@@ -134,75 +185,45 @@ void blue_auton_period() {
     chassis.drive_distance(5);
     chassis.turn_timeout = 1000;
     chassis.turn_to_angle(-120);
-    chassis.drive_distance(8);
+    chassis.drive_max_voltage = 12;
+    chassis.drive_distance(10);
     Intake.stop();
 }
 
-/**
- * Should swing in a fun S shape.
- */
-
-void swing_test() {
-    chassis.left_swing_to_angle(90);
-    chassis.right_swing_to_angle(0);
+void npc_auton() {
+  chassis.drive_distance(4);
 }
 
-/**
- * A little of this, a little of that; it should end roughly where it started.
- */
+void red_elims_auton() {
+  // Mogo
+    chassis.drive_distance(-9.4);
+    // wait(100, msec);
+    Clamp.toggle();
 
-void full_test() {
-    chassis.drive_distance(24);
-    chassis.turn_to_angle(-45);
-    chassis.drive_distance(-36);
-    chassis.right_swing_to_angle(-90);
-    chassis.drive_distance(24);
-    chassis.turn_to_angle(0);
-}
+    // 2nd Ring
+    wait(500, msec);
+    Intake.spin(fwd, 100, percent);
+    wait(750, msec);
+    chassis.turn_to_angle(75);
+    chassis.drive_distance(5);
 
-/**
- * Doesn't drive the robot, but just prints coordinates to the Brain screen
- * so you can check if they are accurate to life. Push the robot around and
- * see if the coordinates increase like you'd expect.
- */
+    // 3rd Ring
+    chassis.turn_to_angle(150);
+    chassis.drive_distance(4);
+    wait(2000, msec);
+    
+    // Align & Perform long distance drive
+    Intake.stop();
+    chassis.drive_distance(-4);
+    chassis.drive_stop(brake);
 
-void odom_test() {
-    chassis.set_coordinates(0, 0, 0);
-    while (1) {
-        Brain.Screen.clearScreen();
-        Brain.Screen.printAt(5, 20, "Left: %f", chassis.get_X_position());
-        Brain.Screen.printAt(5, 40, "Y: %f", chassis.get_Y_position());
-        Brain.Screen.printAt(5, 60, "Heading: %f", chassis.get_absolute_heading());
-        Brain.Screen.printAt(5, 80, "ForwardTracker: %f", chassis.get_ForwardTracker_position());
-        Brain.Screen.printAt(5, 100, "SidewaysTracker: %f", chassis.get_SidewaysTracker_position());
-        task::sleep(20);
-    }
-}
-
-/**
- * Should end in the same place it began, but the second movement
- * will be curved while the first is straight.
- */
-
-void tank_odom_test() {
-    odom_constants();
-    chassis.set_coordinates(0, 0, 0);
-    chassis.turn_to_point(10, 10);
-    chassis.drive_to_point(10, 10);
-    chassis.drive_to_point(0, 0);
-    chassis.turn_to_angle(0);
-}
-
-/**
- * Drives in a square while making a full turn in the process. Should
- * end where it started.
- */
-
-void holonomic_odom_test() {
-    odom_constants();
-    chassis.set_coordinates(0, 0, 0);
-    chassis.holonomic_drive_to_pose(0, 18, 90);
-    chassis.holonomic_drive_to_pose(18, 0, 180);
-    chassis.holonomic_drive_to_pose(0, 18, 270);
-    chassis.holonomic_drive_to_pose(0, 0, 0);
+    // 4th ring
+    // chassis.turn_to_angle(115);
+    // Intake.spin(fwd, 100, percent);
+    // wait(1000, msec);
+    // chassis.drive_distance(4);
+    // wait(1000, msec);
+    // chassis.drive_distance(-4);
+    // wait(500, msec);
+    // Intake.stop();
 }

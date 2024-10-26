@@ -103,23 +103,15 @@ Drive chassis(
     // Sideways tracker center distance (positive distance is behind the center of the robot, negative is in front):
     0);
 
-int current_auton_selection = 2;
-bool auto_started = false;
-
-/**
- * Function before autonomous. It prints the current auton number on the screen
- * and tapping the screen cycles the selected auton by 1. Add anything else you
- * may need, like resetting pneumatic components. You can rename these autons to
- * be more descriptive, if you like.
- */
+int current_auton_selection = 3;
+bool auton_started = false;
 
 void pre_auton() {
     // Initializing Robot Configuration. DO NOT REMOVE!
     vexcodeInit();
     default_constants();
     
-
-    while (!auto_started) {
+    while (!auton_started) {
         Brain.Screen.clearScreen();
         Brain.Screen.printAt(5, 20, "JAR Template v1.2.0");
         Brain.Screen.printAt(5, 40, "Battery Percentage:");
@@ -138,96 +130,62 @@ void pre_auton() {
     }
 }
 
-/**
- * Auton function, which runs the selected auton. Case 0 is the default,
- * and will run in the brain screen goes untouched during preauton. Replace
- * drive_test(), for example, with your own auton function you created in
- * autons.cpp and declared in autons.h.
- */
-
 void autonomous(void) {
-    auto_started = true;
+    auton_started = true;
+    
     switch (current_auton_selection) {
         case 0:
             red_auton_period();
             break;
         case 1:
-            red_auton_period();
-            break;
-        case 2:
             blue_auton_period();
             break;
+        case 2:
+          npc_auton();
+          break;
         case 3:
-            swing_test();
-            break;
-        case 4:
-            full_test();
-            break;
-        case 5:
-            odom_test();
-            break;
-        case 6:
-            tank_odom_test();
-            break;
-        case 7:
-            holonomic_odom_test();
-            break;
-    }
+          red_elims_auton();
+          break;
+        }
 }
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
     controller Controller(controllerType::primary);
 
-    // User control code here, inside the loop
     while (1) {
-        // This is the main execution loop for the user control program.
-        // Each time through the loop your program should update motor + servo
-        // values based on feedback from the joysticks.
-
-        // ........................................................................
-        // Insert user code here. This is where you use the joystick values to
-        // update your motors, etc.
-        // ........................................................................
-
-        // Replace this line with chassis.control_tank(); for tank drive
-        // or chassis.control_holonomic(); for holo drive.
         chassis.control_arcade();
 
+        // Clamp
         if (Controller.ButtonB.pressing()) {
             while (Controller.ButtonB.pressing()) {
                 wait(10, msec);
             }
             Clamp.close();
-        }
-        if (Controller.ButtonA.pressing()) {
+        } else if (Controller.ButtonA.pressing()) {
             while (Controller.ButtonA.pressing()) {
                 wait(10, msec);
             }
             Clamp.open();
         }
+
+        // Knocker
         if (Controller.ButtonY.pressing()) {
             while (Controller.ButtonY.pressing()) {
                 wait(10, msec);
             }
             Knocker.toggle();
         }
+        
+        // Hang
         if (Controller.ButtonUp.pressing()) {
             while (Controller.ButtonUp.pressing()) {
                 wait(10, msec);
             }
             Hang.toggle();
+            Knocker.close();
         }
 
+        // Intake
         if (Controller.ButtonR2.pressing()) {
             Intake.spin(forward, 100, percent);
         } else if (Controller.ButtonR1.pressing()) {
@@ -236,6 +194,7 @@ void usercontrol(void) {
             Intake.stop();
         }
 
+        // Neutral Mech
         if (Controller.ButtonL2.pressing()) {
             Lift.spin(forward, 100, percent);
         } else if (Controller.ButtonL1.pressing()) {
@@ -244,23 +203,16 @@ void usercontrol(void) {
             Lift.stop();
         }
 
-        wait(20, msec);  // Sleep the task for a short amount of time to
-                         // prevent wasted resources.
+        wait(20, msec);
     }
 }
 
-//
-// Main will set up the competition functions and callbacks.
-//
 int main() {
-    // Set up callbacks for autonomous and driver control periods.
     Competition.autonomous(autonomous);
     Competition.drivercontrol(usercontrol);
 
-    // Run the pre-autonomous function.
     pre_auton();
 
-    // Prevent main from exiting with an infinite loop.
     while (true) {
         wait(100, msec);
     }
