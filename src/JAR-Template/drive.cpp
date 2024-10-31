@@ -1,6 +1,6 @@
-#include "vex.h"
-
 #include <iostream>
+
+#include "vex.h"
 
 /**
  * Drive constructor for the chassis.
@@ -274,6 +274,8 @@ void Drive::turn_to_angle(float angle, float turn_max_voltage, float turn_settle
         drive_with_voltage(output, -output);
         task::sleep(10);
     }
+
+    drive_stop(hold);
 }
 
 /**
@@ -322,6 +324,8 @@ void Drive::drive_distance(float distance, float heading, float drive_max_voltag
         drive_with_voltage(drive_output + heading_output, drive_output - heading_output);
         task::sleep(10);
     }
+
+    drive_stop(hold);
 }
 
 /**
@@ -346,6 +350,8 @@ void Drive::left_swing_to_angle(float angle, float swing_max_voltage, float swin
         DriveR.stop(hold);
         task::sleep(10);
     }
+
+    drive_stop(hold);
 }
 
 void Drive::right_swing_to_angle(float angle) {
@@ -362,6 +368,7 @@ void Drive::right_swing_to_angle(float angle, float swing_max_voltage, float swi
         DriveL.stop(hold);
         task::sleep(10);
     }
+    drive_stop(hold);
 }
 
 /**
@@ -515,6 +522,8 @@ void Drive::drive_to_point(float X_position, float Y_position, float drive_min_v
         drive_with_voltage(left_voltage_scaling(drive_output, heading_output), right_voltage_scaling(drive_output, heading_output));
         task::sleep(10);
     }
+
+    chassis.drive_stop(brake);
 }
 
 /**
@@ -601,6 +610,8 @@ void Drive::drive_to_pose(float X_position, float Y_position, float angle, float
         drive_with_voltage(left_voltage_scaling(drive_output, heading_output), right_voltage_scaling(drive_output, heading_output));
         task::sleep(10);
     }
+
+    drive_stop(hold);
 }
 
 /**

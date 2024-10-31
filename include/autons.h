@@ -7,7 +7,23 @@ extern Drive chassis;
 
 void default_constants();
 
-void red_auton_period();
-void blue_auton_period();
-void npc_auton();
-void red_elims_auton();
+#define STRINGIFY_AUTON2(content) #content
+#define STRINGIFY_AUTON(content) STRINGIFY_AUTON2(content)
+
+#define DELAY(expr, t) \
+    wait(t, msec);     \
+    expr;
+
+void intakePulseReverseThreadF();
+void delayedIntakeThreadF();
+
+void red_awp();
+void blue_awp();
+void red_elims();
+void blue_elims();
+void skills();
+void npc();
+
+void intakeColorSortThreadF();
+
+void runAuton(Auton auton);

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "vex.h"
 
 using namespace vex;
@@ -38,7 +40,7 @@ Drive chassis(
     // HOLONOMIC_TWO_ROTATION
     //
     // Write it here:
-    ZERO_TRACKER_NO_ODOM,
+    ZERO_TRACKER_ODOM,
 
     // Add the names of your Drive motors into the motor groups below, separated by commas, i.e. motor_group(Motor1,Motor2,Motor3).
     // You will input whatever motor names you chose when you configured your robot using the sidebar configurer, they don't have to be "Motor1" and "Motor2".
@@ -84,7 +86,7 @@ Drive chassis(
     // If you are using position tracking, this is the Forward Tracker port (the tracker which runs parallel to the direction of the chassis).
     // If this is a rotation sensor, enter it in "PORT1" format, inputting the port below.
     // If this is an encoder, enter the port as an integer. Triport A will be a "1", Triport B will be a "2", etc.
-    3,
+    11,
 
     // Input the Forward Tracker diameter (reverse it to make the direction switch):
     3.25,
@@ -92,7 +94,7 @@ Drive chassis(
     // Input Forward Tracker center distance (a positive distance corresponds to a tracker on the right side of the robot, negative is left.)
     // For a zero tracker tank drive with odom, put the positive distance from the center of the robot to the right side of the drive.
     // This distance is in inches:
-    5.75,
+    6,
 
     // Input the Sideways Tracker Port, following the same steps as the Forward Tracker Port:
     0,
@@ -103,57 +105,72 @@ Drive chassis(
     // Sideways tracker center distance (positive distance is behind the center of the robot, negative is in front):
     0);
 
-int current_auton_selection = 3;
 bool auton_started = false;
-
-void pre_auton() {
-    // Initializing Robot Configuration. DO NOT REMOVE!
-    vexcodeInit();
-    default_constants();
-    
-    while (!auton_started) {
-        Brain.Screen.clearScreen();
-        Brain.Screen.printAt(5, 20, "JAR Template v1.2.0");
-        Brain.Screen.printAt(5, 40, "Battery Percentage:");
-        Brain.Screen.printAt(5, 60, "%d", Brain.Battery.capacity());
-        Brain.Screen.printAt(5, 80, "Chassis Heading Reading:");
-        Brain.Screen.printAt(5, 100, "%f", chassis.get_absolute_heading());
-        Brain.Screen.printAt(5, 120, "Selected Auton:");
-        Brain.Screen.printAt(5, 140, "Auton %f", current_auton_selection + 1);
-        if (Brain.Screen.pressing()) {
-            while (Brain.Screen.pressing()) {};
-            current_auton_selection++;
-        } else if (current_auton_selection == 8) {
-            current_auton_selection = 0;
-        }
-        task::sleep(10);
-    }
-}
 
 void autonomous(void) {
     auton_started = true;
-    
-    switch (current_auton_selection) {
-        case 0:
-            red_auton_period();
-            break;
-        case 1:
-            blue_auton_period();
-            break;
-        case 2:
-          npc_auton();
-          break;
-        case 3:
-          red_elims_auton();
-          break;
-        }
+    runAuton(AUTON);
 }
 
-void usercontrol(void) {
-    controller Controller(controllerType::primary);
+enum LiftState {
+    SEARCHING,
+    SCORING,
+    OFF
+};
 
+LiftState liftState = OFF;
+
+void liftScoringThreadF() {
+    Lift.score();
+    liftState = OFF;
+};
+
+void liftSearchingThreadF() {
+    colorSensor.setLightPower(100, pct);
+    Intake.setStopping(hold);
+    Intake.spin(fwd, 55, pct);
+    Lift.returnToDefaultPosition(true);
+
+    while (liftState == SEARCHING) {
+        auto rgb = colorSensor.getRgb();
+
+        if (rgb.red > 200 || rgb.blue > 200) {
+            Intake.stop();
+        }
+
+        wait(20, msec);
+    };
+};
+
+void usercontrol(void) {
+    Lift.setStopping(hold);
+    Lift.setVelocity(100, percent);
+    Lift.returnToDefaultPosition(false);
+
+    bool manualInterrupt = false;
     while (1) {
         chassis.control_arcade();
+
+        if (Controller.ButtonL1.pressing()) {
+            liftState = OFF;
+            Lift.forward();
+        } else if (Controller.ButtonL2.pressing()) {
+            liftState = OFF;
+            Lift.backward();
+        } else if (Controller.ButtonLeft.pressing()) {
+            liftState = SEARCHING;
+            vex::thread liftSearchingThread(liftSearchingThreadF);
+        } else if (Controller.ButtonUp.pressing()) {
+            liftState = SCORING;
+            vex::thread liftScoringThread(liftScoringThreadF);
+        } else if (liftState == OFF) {
+            colorSensor.setLightPower(0, pct);
+            if (Lift.position(deg) > Lift.defaultPosition && Lift.position(deg) < 180) {
+                Lift.returnToDefaultPosition(false);
+            } else {
+                Lift.stop();
+            }
+        };
 
         // Clamp
         if (Controller.ButtonB.pressing()) {
@@ -175,9 +192,9 @@ void usercontrol(void) {
             }
             Knocker.toggle();
         }
-        
+
         // Hang
-        if (Controller.ButtonUp.pressing()) {
+        if (Controller.ButtonDown.pressing()) {
             while (Controller.ButtonUp.pressing()) {
                 wait(10, msec);
             }
@@ -187,20 +204,14 @@ void usercontrol(void) {
 
         // Intake
         if (Controller.ButtonR2.pressing()) {
-            Intake.spin(forward, 100, percent);
+            manualInterrupt = true;
+            Intake.forward();
         } else if (Controller.ButtonR1.pressing()) {
-            Intake.spin(reverse, 100, percent);
-        } else {
+            manualInterrupt = true;
+            Intake.backward();
+        } else if (liftState == OFF || manualInterrupt) {
             Intake.stop();
-        }
-
-        // Neutral Mech
-        if (Controller.ButtonL2.pressing()) {
-            Lift.spin(forward, 100, percent);
-        } else if (Controller.ButtonL1.pressing()) {
-            Lift.spin(reverse, 100, percent);
-        } else {
-            Lift.stop();
+            manualInterrupt = false;
         }
 
         wait(20, msec);
@@ -211,7 +222,14 @@ int main() {
     Competition.autonomous(autonomous);
     Competition.drivercontrol(usercontrol);
 
-    pre_auton();
+    while (!auton_started) {
+        Brain.Screen.clearScreen();
+        Brain.Screen.printAt(5, 20, "JAR Template v1.2.0");
+        Brain.Screen.printAt(5, 40, "Battery Percentage:      %d", Brain.Battery.capacity());
+        Brain.Screen.printAt(5, 60, "Chassis Heading Reading: %f", chassis.get_absolute_heading());
+        // Brain.Screen.printAt(5, 120, "Selected Auton: %s", STRINGIFY_AUTON(AUTON));
+        task::sleep(10);
+    }
 
     while (true) {
         wait(100, msec);
