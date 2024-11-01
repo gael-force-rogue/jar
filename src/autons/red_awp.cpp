@@ -15,8 +15,7 @@ void red_awp() {
     Lift.spinToPosition(2, deg, true);
     Lift.spinToPosition(70, deg, true);
     Lift.spinToPosition(-20, deg, false);
-    // chassis.drive_distance(-0.5);
-    Intake.stop();
+    intake.stop();
 
     // Go to & Pick up Mogo
     chassis.turn_to_angle(48);
@@ -29,7 +28,7 @@ void red_awp() {
 
     // Get 1st Ring (standalone)
     chassis.turn_to_angle(177);
-    Intake.forward();
+    intake.forward();
     chassis.drive_distance(5);
     wait(100, msec);
 
@@ -38,11 +37,11 @@ void red_awp() {
     chassis.drive_distance(4.75);
     wait(200, msec);
     chassis.right_swing_to_angle(-70);
-    Intake.stop();
+    intake.stop();
     chassis.drive_distance(-5);
 
     // Get 3rd Ring (stack)
-    Intake.forward();
+    intake.forward();
     chassis.turn_to_angle(-110);
     chassis.drive_distance(5.75);
     wait(100, msec);
@@ -53,7 +52,7 @@ void red_awp() {
     // Go to ladder
     Lift.spinToPosition(180, deg, false);
     Lift.spinToPosition(200, deg, false);
-    Intake.stop();
+    intake.stop();
     chassis.drive_distance(11);
     chassis.drive_stop(hold);
 };

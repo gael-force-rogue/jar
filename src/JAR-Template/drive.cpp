@@ -522,8 +522,6 @@ void Drive::drive_to_point(float X_position, float Y_position, float drive_min_v
         drive_with_voltage(left_voltage_scaling(drive_output, heading_output), right_voltage_scaling(drive_output, heading_output));
         task::sleep(10);
     }
-
-    chassis.drive_stop(brake);
 }
 
 /**
@@ -610,8 +608,6 @@ void Drive::drive_to_pose(float X_position, float Y_position, float angle, float
         drive_with_voltage(left_voltage_scaling(drive_output, heading_output), right_voltage_scaling(drive_output, heading_output));
         task::sleep(10);
     }
-
-    drive_stop(hold);
 }
 
 /**

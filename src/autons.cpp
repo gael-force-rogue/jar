@@ -2,22 +2,19 @@
 
 #include "vex.h"
 
-/**
- * Resets the constants for auton movement.
- * Modify these to change the default behavior of functions like
- * drive_distance(). For explanations of the difference between
- * drive, heading, turning, and swinging, as well as the PID and
- * exit conditions, check the docs.
- */
-void default_constants() {
+void setDefaultConstants() {
     // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI).
     chassis.set_drive_constants(10, 2, 0, 10, 0);
     chassis.set_heading_constants(6, 1.2, 0, 1, 0);
     chassis.set_turn_constants(7, .2, 0, 1.3, 0);
     chassis.set_swing_constants(12, 2, .0, 5, 15);
 
+    // chassis.drive_min_voltage = 2;
+    chassis.swing_max_voltage = 5;
+    chassis.turn_max_voltage = 7;
+
     // Each exit condition set is in the form of (settle_error, settle_time, timeout).
-    chassis.set_drive_exit_conditions(1.5, 200, 3000);
+    chassis.set_drive_exit_conditions(1.5, 200, 10000);
     chassis.set_turn_exit_conditions(0.5, 150, 700);
     chassis.set_swing_exit_conditions(1, 300, 1000);
 }
@@ -27,10 +24,10 @@ void default_constants() {
  * For functions like drive_to_point(), it's often better to have
  * a slower max_voltage and greater settle_error than you would otherwise.
  */
-void odom_constants() {
-    default_constants();
+void setOdometryConstants() {
+    setDefaultConstants();
     chassis.heading_max_voltage = 10;
-    chassis.drive_max_voltage = 8;
+    chassis.drive_max_voltage = 7;
     chassis.drive_settle_error = 3;
     chassis.boomerang_lead = .5;
     chassis.drive_min_voltage = 0;
@@ -38,42 +35,26 @@ void odom_constants() {
 
 void delayedIntakeThreadF() {
     wait(250, msec);
-    Intake.forward();
+    intake.forward();
 };
 
 void intakePulseReverseThreadF() {
-    Intake.backward();
-
+    intake.backward();
     wait(1000, msec);
-    Intake.forward();
-};
-
-void intakeColorSortThreadF() {
-    while (true) {
-        if (Intake.velocity(pct) > 20 && colorSensor.ringDetected()) {
-            Intake.stop();
-            wait(100, msec);
-            Intake.forward();
-            do {
-                wait(20, msec);
-            } while (colorSensor.ringDetected());
-        };
-
-        wait(20, msec);
-    }
+    intake.forward();
 };
 
 void runAuton(Auton auton) {
-    default_constants();
+    setDefaultConstants();
     chassis.set_coordinates(0, 0, 0);
-    Intake.resetPosition();
+    intake.resetPosition();
     Lift.resetPosition();
     Lift.setVelocity(100, percent);
+    Lift.returnToDefaultPosition(false);
 
-    // vex::thread intakeColorSortThread(intakeColorSortThreadF);
+    vex::thread intakeSearchingThread(intakeSearchingThreadF);
 
     vex::timer autonTimer;
-
     switch (auton) {
         case RED_AWP:
             red_awp();
@@ -94,7 +75,12 @@ void runAuton(Auton auton) {
             npc();
             break;
     };
-
     std::cout << "Auton Took: " << autonTimer.time() << "ms" << std::endl;
     autonTimer.~timer();
+
+    chassis.drive_stop(hold);
+    wait(1000, msec);
+    Clamp.toggle();
+
+    std::cout << "WARNING: AUTO UNCLAMP IS ON" << std::endl;
 };

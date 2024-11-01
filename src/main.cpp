@@ -112,34 +112,9 @@ void autonomous(void) {
     runAuton(AUTON);
 }
 
-enum LiftState {
-    SEARCHING,
-    SCORING,
-    OFF
-};
-
-LiftState liftState = OFF;
-
 void liftScoringThreadF() {
     Lift.score();
-    liftState = OFF;
-};
-
-void liftSearchingThreadF() {
-    colorSensor.setLightPower(100, pct);
-    Intake.setStopping(hold);
-    Intake.spin(fwd, 55, pct);
-    Lift.returnToDefaultPosition(true);
-
-    while (liftState == SEARCHING) {
-        auto rgb = colorSensor.getRgb();
-
-        if (rgb.red > 200 || rgb.blue > 200) {
-            Intake.stop();
-        }
-
-        wait(20, msec);
-    };
+    intake.state = OFF;
 };
 
 void usercontrol(void) {
@@ -147,25 +122,25 @@ void usercontrol(void) {
     Lift.setVelocity(100, percent);
     Lift.returnToDefaultPosition(false);
 
-    bool manualInterrupt = false;
+    vex::thread intakeSearchingThread(intakeSearchingThreadF);
+
+    bool manualIntakeInterrupt = false;
     while (1) {
         chassis.control_arcade();
 
         if (Controller.ButtonL1.pressing()) {
-            liftState = OFF;
+            intake.state = OFF;
             Lift.forward();
         } else if (Controller.ButtonL2.pressing()) {
-            liftState = OFF;
+            intake.state = OFF;
             Lift.backward();
         } else if (Controller.ButtonLeft.pressing()) {
-            liftState = SEARCHING;
-            vex::thread liftSearchingThread(liftSearchingThreadF);
+            intake.state = SEARCHING;
         } else if (Controller.ButtonUp.pressing()) {
-            liftState = SCORING;
+            intake.state = SCORING;
             vex::thread liftScoringThread(liftScoringThreadF);
-        } else if (liftState == OFF) {
-            colorSensor.setLightPower(0, pct);
-            if (Lift.position(deg) > Lift.defaultPosition && Lift.position(deg) < 180) {
+        } else if (intake.state == OFF) {
+            if (Lift.relativePosition() > Lift.defaultPosition && Lift.relativePosition() < 180) {
                 Lift.returnToDefaultPosition(false);
             } else {
                 Lift.stop();
@@ -204,14 +179,14 @@ void usercontrol(void) {
 
         // Intake
         if (Controller.ButtonR2.pressing()) {
-            manualInterrupt = true;
-            Intake.forward();
+            manualIntakeInterrupt = true;
+            intake.forward();
         } else if (Controller.ButtonR1.pressing()) {
-            manualInterrupt = true;
-            Intake.backward();
-        } else if (liftState == OFF || manualInterrupt) {
-            Intake.stop();
-            manualInterrupt = false;
+            manualIntakeInterrupt = true;
+            intake.backward();
+        } else if (intake.state == OFF || manualIntakeInterrupt) {
+            manualIntakeInterrupt = false;
+            intake.stop();
         }
 
         wait(20, msec);
@@ -221,6 +196,10 @@ void usercontrol(void) {
 int main() {
     Competition.autonomous(autonomous);
     Competition.drivercontrol(usercontrol);
+
+    if (Brain.Battery.capacity() < 15) {
+        Controller.rumble("-.-.-");
+    }
 
     while (!auton_started) {
         Brain.Screen.clearScreen();

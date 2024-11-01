@@ -1,25 +1,59 @@
+#include <iostream>
+
 using namespace vex;
 
-class IntakeMotor : public motor {
-   public:
-    IntakeMotor(int index, bool reverse) : vex::motor(index, reverse) {};
-
-    inline void forward() {
-        this->spin(fwd, 100, pct);
-    }
-
-    inline void backward() {
-        this->spin(fwd, -100, pct);
-    }
+enum Auton {
+    RED = 1,
+    BLUE = 2,
+    AWP = 4,
+    ELIMS = 8,
+    SKILLS = 16,
+    NPC = 32,
+    RED_AWP = RED | AWP,
+    BLUE_AWP = BLUE | AWP,
+    RED_ELIMS = RED | ELIMS,
+    BLUE_ELIMS = BLUE | ELIMS,
 };
+
+#define AUTON SKILLS
+
+enum IntakeState {
+    SEARCHING,
+    SCORING,
+    OFF
+};
+
+class Intake : public motor {
+   public:
+    vex::optical colorSensor;
+    IntakeState state = OFF;
+
+    Intake(int port, bool reverse, int opticalPort) : vex::motor(port, reverse), colorSensor(opticalPort) {};
+
+    inline void forward(float velocity = 100) {
+        this->spin(fwd, velocity, pct);
+    };
+
+    inline void backward(float velocity = 100) {
+        this->spin(fwd, -velocity, pct);
+    };
+
+    inline void spinBy(float pos) {
+        this->spinToPosition(this->position(deg) + pos, deg, true);
+    };
+
+    void search();
+
+    bool launchRingIfNeeded();
+};
+
+float normalize360(float angle);
 
 class LiftMotor : public motor {
    public:
-    float defaultPosition = -10;
+    float defaultPosition = -15;
 
     LiftMotor(int index, bool reverse) : vex::motor(index, reverse) {};
-
-    void score();
 
     inline void forward() {
         this->spin(fwd, 100, pct);
@@ -29,9 +63,19 @@ class LiftMotor : public motor {
         this->spin(fwd, -100, pct);
     };
 
-    inline void returnToDefaultPosition(bool waitForCompletion) {
-        this->spinToPosition(defaultPosition, deg, waitForCompletion);
+    inline float relativePosition() {
+        return normalize360(position(deg));
     };
+
+    inline void spinToRelativePosition(float angle, bool waitForCompletion) {
+        this->spinToPosition(position(deg) - relativePosition() + angle, deg, waitForCompletion);
+    };
+
+    inline void returnToDefaultPosition(bool waitForCompletion) {
+        this->spinToRelativePosition(defaultPosition, true);
+    };
+
+    void score();
 };
 
 class Piston : public pneumatics {
@@ -56,16 +100,6 @@ class Piston : public pneumatics {
     }
 };
 
-class ColorSensor : public optical {
-   public:
-    ColorSensor(int port) : vex::optical(port) {};
-
-    inline bool ringDetected() {
-        auto rgb = this->getRgb();
-        return rgb.red > 200 || rgb.blue > 200;
-    };
-};
-
 extern brain Brain;
 extern controller Controller;
 
@@ -76,22 +110,11 @@ extern motor Right1;
 extern motor Right2;
 extern motor Right3;
 
-extern IntakeMotor Intake;
+extern Intake intake;
 extern LiftMotor Lift;
 
 extern Piston Clamp;
 extern Piston Hang;
 extern Piston Knocker;
 
-extern ColorSensor colorSensor;
-
-enum Auton {
-    RED_AWP,
-    BLUE_AWP,
-    RED_ELIMS,
-    BLUE_ELIMS,
-    SKILLS,
-    NPC
-};
-
-#define AUTON SKILLS
+void intakeSearchingThreadF();

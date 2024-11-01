@@ -5,8 +5,6 @@ class Drive;
 
 extern Drive chassis;
 
-void default_constants();
-
 #define STRINGIFY_AUTON2(content) #content
 #define STRINGIFY_AUTON(content) STRINGIFY_AUTON2(content)
 
@@ -16,6 +14,7 @@ void default_constants();
 
 void intakePulseReverseThreadF();
 void delayedIntakeThreadF();
+void intakeColorSortThreadF();
 
 void red_awp();
 void blue_awp();
@@ -24,6 +23,7 @@ void blue_elims();
 void skills();
 void npc();
 
-void intakeColorSortThreadF();
+void setDefaultConstants();
+void setOdometryConstants();
 
 void runAuton(Auton auton);
