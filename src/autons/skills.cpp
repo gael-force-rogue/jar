@@ -13,9 +13,6 @@ void skillsIntakeSearchThreadF() {
 
 void skills() {
     chassis.drive_stop(hold);
-    wait(1000, msec);
-    chassis.Gyro.calibrate();
-    wait(1000, msec);
 
     vex::thread delayedIntakeStopThread;
     vex::thread intakePulseReverseThread;
