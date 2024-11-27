@@ -117,12 +117,26 @@ void liftScoringThreadF() {
     intake.state = OFF;
 };
 
+void hangThreadF() {
+    while (1) {
+        if (Controller.ButtonDown.pressing()) {
+            while (Controller.ButtonDown.pressing()) {
+                wait(10, msec);
+            }
+            Hang.toggle();
+            Knocker.close();
+        }
+        wait(20, msec);
+    };
+}
+
 void usercontrol(void) {
     Lift.setStopping(hold);
     Lift.setVelocity(100, percent);
-    Lift.returnToDefaultPosition(false);
+    // Lift.returnToDefaultPosition(false);
 
     vex::thread intakeSearchingThread(intakeSearchingThreadF);
+    vex::thread hangThread(hangThreadF);
 
     bool manualIntakeInterrupt = false;
     while (1) {
@@ -169,13 +183,7 @@ void usercontrol(void) {
         }
 
         // Hang
-        if (Controller.ButtonDown.pressing()) {
-            while (Controller.ButtonUp.pressing()) {
-                wait(10, msec);
-            }
-            Hang.toggle();
-            Knocker.close();
-        }
+        // threaded
 
         // Intake
         if (Controller.ButtonR2.pressing()) {

@@ -13,11 +13,15 @@ extern Drive chassis;
     expr;
 
 void intakePulseReverseThreadF();
-void delayedIntakeThreadF();
-void intakeColorSortThreadF();
+void delayedIntakeStartThreadF();
+void delayedIntakeStopThreadF();
+void shortDelayedIntakeStopThreadF();
+void disconnectThreadF();
 
 void red_awp();
 void blue_awp();
+void red_mogorush();
+void blue_mogorush();
 void red_elims();
 void blue_elims();
 void skills();

@@ -6,16 +6,19 @@ enum Auton {
     RED = 1,
     BLUE = 2,
     AWP = 4,
-    ELIMS = 8,
-    SKILLS = 16,
-    NPC = 32,
+    MOGORUSH = 8,
+    ELIMS = 16,
+    SKILLS = 32,
+    NPC = 64,
     RED_AWP = RED | AWP,
     BLUE_AWP = BLUE | AWP,
     RED_ELIMS = RED | ELIMS,
     BLUE_ELIMS = BLUE | ELIMS,
+    RED_MOGORUSH = RED | MOGORUSH,
+    BLUE_MOGORUSH = BLUE | MOGORUSH,
 };
 
-#define AUTON SKILLS
+#define AUTON BLUE_MOGORUSH
 
 enum IntakeState {
     SEARCHING,
@@ -51,7 +54,7 @@ float normalize360(float angle);
 
 class LiftMotor : public motor {
    public:
-    float defaultPosition = -15;
+    float defaultPosition = 0;
 
     LiftMotor(int index, bool reverse) : vex::motor(index, reverse) {};
 

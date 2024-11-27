@@ -76,10 +76,18 @@ Piston Hang(pneumatics(Brain.ThreeWirePort.B), false);
 Piston Knocker(pneumatics(Brain.ThreeWirePort.A), false);
 
 void intakeSearchingThreadF() {
+    intake.colorSensor.setLightPower(100);
+
+    const float startingSystemTime = vex::timer::system();
+
     while (1) {
         // if (intake.launchRingIfNeeded()) {
         //     continue;
         // }
+
+        if (!chassis.Gyro.installed()) {
+            std::cout << "IMU Not Installed: " << (vex::timer::system() - startingSystemTime) / 1000 << std::endl;
+        };
 
         if (intake.state == SEARCHING) {
             intake.colorSensor.setLightPower(100);
