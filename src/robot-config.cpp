@@ -68,7 +68,7 @@ void LiftMotor::score() {
     intake.stop();
 };
 
-Intake intake(vex::PORT16, true, vex::PORT10);
+Intake intake(vex::PORT18, true, vex::PORT10);
 LiftMotor Lift(vex::PORT7, false);
 
 Piston Clamp(pneumatics(Brain.ThreeWirePort.H), false);

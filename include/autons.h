@@ -16,6 +16,7 @@ void intakePulseReverseThreadF();
 void delayedIntakeStartThreadF();
 void delayedIntakeStopThreadF();
 void shortDelayedIntakeStopThreadF();
+void intakeBurstF();
 void disconnectThreadF();
 
 void red_awp();

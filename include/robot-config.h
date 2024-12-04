@@ -18,7 +18,7 @@ enum Auton {
     BLUE_MOGORUSH = BLUE | MOGORUSH,
 };
 
-#define AUTON BLUE_MOGORUSH
+#define AUTON SKILLS
 
 enum IntakeState {
     SEARCHING,

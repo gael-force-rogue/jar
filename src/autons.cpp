@@ -75,6 +75,12 @@ void shortDelayedIntakeStopThreadF() {
     intake.stop();
 };
 
+void intakeBurstF() {
+    intake.forward();
+    wait(925, msec);
+    intake.stop();
+};
+
 void disconnectThreadF() {
     while (true) {
         if (!chassis.Gyro.installed()) {
@@ -98,6 +104,7 @@ void runAuton(Auton auton) {
     Lift.returnToDefaultPosition(false);
 
     vex::thread intakeSearchingThread(intakeSearchingThreadF);
+    vex::thread disconnectThread(disconnectThreadF);
 
     vex::timer autonTimer;
     switch (auton) {
@@ -130,6 +137,9 @@ void runAuton(Auton auton) {
 
     std::cout << "Auton Took: " << autonTimer.time() << "ms" << std::endl;
     std::cout << "Intake Temp: " << intake.temperature(celsius) << std::endl;
+    std::cout << "LeftChassis Temp: " << Left1.temperature(celsius) << ", " << Left2.temperature(celsius) << ", " << Left3.temperature(celsius) << std::endl;
+    std::cout << "RightChassis Temp: " << Right1.temperature(celsius) << ", " << Left2.temperature(celsius) << ", " << Left3.temperature(celsius)<< std::endl;
+    
     autonTimer.~timer();
 
     // wait(1000, msec);
