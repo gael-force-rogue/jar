@@ -207,16 +207,16 @@ int main() {
 
     if (Brain.Battery.capacity() < 15) {
         Controller.rumble("-.-.-");
-    }
+    };
 
-    while (!auton_started) {
-        Brain.Screen.clearScreen();
-        Brain.Screen.printAt(5, 20, "JAR Template v1.2.0");
-        Brain.Screen.printAt(5, 40, "Battery Percentage:      %d", Brain.Battery.capacity());
-        Brain.Screen.printAt(5, 60, "Chassis Heading Reading: %f", chassis.get_absolute_heading());
-        // Brain.Screen.printAt(5, 120, "Selected Auton: %s", STRINGIFY_AUTON(AUTON));
-        task::sleep(10);
-    }
+    // while (!auton_started) {
+    //     Brain.Screen.clearScreen();
+    //     Brain.Screen.printAt(5, 20, "JAR Template v1.2.0");
+    //     Brain.Screen.printAt(5, 40, "Battery Percentage:      %d", Brain.Battery.capacity());
+    //     Brain.Screen.printAt(5, 60, "Chassis Heading Reading: %f", chassis.get_absolute_heading());
+    //     // Brain.Screen.printAt(5, 120, "Selected Auton: %s", STRINGIFY_AUTON(AUTON));
+    //     task::sleep(10);
+    // }
 
     while (true) {
         wait(100, msec);

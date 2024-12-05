@@ -7,13 +7,13 @@ void red_awp() {
 
     // Score Alliance
     Lift.resetPosition();
-    chassis.turn_to_angle(53);
-    chassis.drive_distance(2.75);
+    chassis.turn_to_angle(52);
+    chassis.drive_distance(2.6);
     Lift.spinToRelativePosition(320, false);
 
     // Clamp
     wait(600, msec);
-    chassis.drive_distance(-2);
+    chassis.drive_distance(-1.85);
     chassis.turn_to_angle(75);
     Lift.stop(coast);
     chassis.drive_distance(-10.5);

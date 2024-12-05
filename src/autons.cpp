@@ -3,21 +3,6 @@
 #include "vex.h"
 
 void setDefaultConstants() {
-    // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI).
-    chassis.set_drive_constants(12, 2, 0, 10, 0);
-    chassis.set_heading_constants(6, 1.2, 0, 1, 0);
-    chassis.set_turn_constants(7, .2, 0, 1.3, 0);
-    chassis.set_swing_constants(12, 2, .0, 5, 15);
-
-    // chassis.drive_min_voltage = 2;
-    chassis.swing_max_voltage = 5;
-    chassis.turn_max_voltage = 7;
-
-    // Each exit condition set is in the form of (settle_error, settle_time, timeout).
-    chassis.set_drive_exit_conditions(1.5, 200, 4000);
-    chassis.set_turn_exit_conditions(0.5, 150, 700);
-    chassis.set_swing_exit_conditions(1, 300, 1000);
-
     if (AUTON != SKILLS) {
         // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI).
         chassis.set_drive_constants(10, 2, 0, 10, 0);
@@ -32,8 +17,23 @@ void setDefaultConstants() {
         // Each exit condition set is in the form of (settle_error, settle_time, timeout).
         chassis.set_drive_exit_conditions(1.5, 200, 2500);
         chassis.set_turn_exit_conditions(1, 200, 1000);
+        chassis.set_swing_exit_conditions(1, 300, 600);
+    } else {
+        // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI).
+        chassis.set_drive_constants(12, 2, 0, 10, 0);
+        chassis.set_heading_constants(6, 1.2, 0, 1, 0);
+        chassis.set_turn_constants(7, .2, 0, 1.3, 0);
+        chassis.set_swing_constants(12, 2, .0, 5, 15);
+
+        // chassis.drive_min_voltage = 2;
+        chassis.swing_max_voltage = 5;
+        chassis.turn_max_voltage = 7;
+
+        // Each exit condition set is in the form of (settle_error, settle_time, timeout).
+        chassis.set_drive_exit_conditions(1.5, 200, 4000);
+        chassis.set_turn_exit_conditions(1.5, 150, 1000);
         chassis.set_swing_exit_conditions(1, 300, 1000);
-    }
+    };
 
     if (AUTON == RED_MOGORUSH || AUTON == BLUE_MOGORUSH) {
         chassis.set_turn_exit_conditions(3, 100, 300);
@@ -61,12 +61,12 @@ void delayedIntakeStartThreadF() {
 
 void intakePulseReverseThreadF() {
     intake.backward();
-    wait(1000, msec);
+    wait(750, msec);
     intake.forward();
 };
 
 void delayedIntakeStopThreadF() {
-    wait(750, msec);
+    wait(800, msec);
     intake.stop();
 };
 
@@ -103,12 +103,13 @@ void runAuton(Auton auton) {
     intake.setStopping(hold);
     Lift.returnToDefaultPosition(false);
 
-    vex::thread intakeSearchingThread(intakeSearchingThreadF);
+    // vex::thread intakeSearchingThread(intakeSearchingThreadF);
     vex::thread disconnectThread(disconnectThreadF);
 
     vex::timer autonTimer;
     switch (auton) {
         case RED_AWP:
+            std::cout << "Running Red AWP" << std::endl;
             red_awp();
             break;
         case BLUE_AWP:
@@ -138,8 +139,8 @@ void runAuton(Auton auton) {
     std::cout << "Auton Took: " << autonTimer.time() << "ms" << std::endl;
     std::cout << "Intake Temp: " << intake.temperature(celsius) << std::endl;
     std::cout << "LeftChassis Temp: " << Left1.temperature(celsius) << ", " << Left2.temperature(celsius) << ", " << Left3.temperature(celsius) << std::endl;
-    std::cout << "RightChassis Temp: " << Right1.temperature(celsius) << ", " << Left2.temperature(celsius) << ", " << Left3.temperature(celsius)<< std::endl;
-    
+    std::cout << "RightChassis Temp: " << Right1.temperature(celsius) << ", " << Left2.temperature(celsius) << ", " << Left3.temperature(celsius) << std::endl;
+
     autonTimer.~timer();
 
     // wait(1000, msec);
