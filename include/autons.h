@@ -5,9 +5,6 @@ class Drive;
 
 extern Drive chassis;
 
-#define STRINGIFY_AUTON2(content) #content
-#define STRINGIFY_AUTON(content) STRINGIFY_AUTON2(content)
-
 #define DELAY(expr, t) \
     wait(t, msec);     \
     expr;

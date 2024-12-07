@@ -1,4 +1,4 @@
-# 5327R Autons
+# 5327R
 
 To change autons go into `/include/robot-config.h` and in the line that starts
 with

@@ -18,18 +18,18 @@ enum Auton {
     BLUE_MOGORUSH = BLUE | MOGORUSH,
 };
 
-#define AUTON SKILLS
+#define AUTON RED_AWP
 
 enum IntakeState {
-    SEARCHING,
-    SCORING,
-    OFF
+    ISEARCHING,
+    ISCORING,
+    IOFF
 };
 
 class Intake : public motor {
    public:
     vex::optical colorSensor;
-    IntakeState state = OFF;
+    IntakeState state = IOFF;
 
     Intake(int port, bool reverse, int opticalPort) : vex::motor(port, reverse), colorSensor(opticalPort) {};
 
@@ -52,9 +52,24 @@ class Intake : public motor {
 
 float normalize360(float angle);
 
+void liftToggleThreadF();
+
+enum LiftState {
+    STANDBY,
+    LOADING,
+    SCORING
+};
+
 class LiftMotor : public motor {
+   private:
+    inline float relativePosition() {
+        return normalize360(position(deg));
+    };
+
    public:
-    float defaultPosition = 0;
+    float defaultPosition = -40;
+    LiftState state = LiftState::LOADING;
+    bool controlled = false;
 
     LiftMotor(int index, bool reverse) : vex::motor(index, reverse) {};
 
@@ -66,19 +81,24 @@ class LiftMotor : public motor {
         this->spin(fwd, -100, pct);
     };
 
-    inline float relativePosition() {
-        return normalize360(position(deg));
-    };
-
     inline void spinToRelativePosition(float angle, bool waitForCompletion) {
         this->spinToPosition(position(deg) - relativePosition() + angle, deg, waitForCompletion);
     };
 
-    inline void returnToDefaultPosition(bool waitForCompletion) {
-        this->spinToRelativePosition(defaultPosition, true);
+    inline void cycle() {
+        if (this->state == STANDBY) {
+            controlled = true;
+            this->spinToRelativePosition(6.5, true);
+            this->state = LiftState::LOADING;
+            controlled = false;
+        } else if (this->state == LOADING) {
+            this->spinToRelativePosition(200, true);
+            this->state = LiftState::SCORING;
+        } else if (this->state == SCORING) {
+            this->spinToRelativePosition(defaultPosition, true);
+            this->state = LiftState::STANDBY;
+        };
     };
-
-    void score();
 };
 
 class Piston : public pneumatics {
@@ -121,3 +141,10 @@ extern Piston Hang;
 extern Piston Knocker;
 
 void intakeSearchingThreadF();
+
+#define TO_STRING(x) #x
+#define STRINGIFY_AUTON(x) TO_STRING(x)
+inline void logAuton() {
+    Controller.Screen.setCursor(3, 1);
+    Controller.Screen.print(STRINGIFY_AUTON(AUTON));
+}

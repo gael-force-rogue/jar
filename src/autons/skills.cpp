@@ -19,7 +19,11 @@ void printPosition() {
 
 void skills() {
     chassis.drive_stop(hold);
-    wait(2000, msec);
+    intake.setStopping(coast);
+    Lift.setStopping(hold);
+    intake.stop();
+    Lift.stop();
+    wait(500, msec);
 
     vex::thread intakePulseReverseThread;
     vex::thread delayedIntakeStopThread;
@@ -27,19 +31,20 @@ void skills() {
 
     // Alliance Stake
     intake.forward();
-    wait(800, msec);
+    wait(900, msec);
     intake.stop();
-    Lift.returnToDefaultPosition(true);
 
     // Mogo
-    chassis.drive_distance(4.5);
+    chassis.drive_distance(4.62);
+    Clamp.toggle();
     chassis.turn_to_angle(-90);
+
     float midpointX = chassis.odom.X_position,
           midpointY = chassis.odom.Y_position,
           midpointTheta = chassis.odom.orientation_deg;
     printPosition();
 
-    chassis.drive_distance(-6.5);
+    chassis.drive_distance(-6.75);
     Clamp.toggle();
 
     // Ring 1
@@ -47,362 +52,112 @@ void skills() {
     chassis.turn_to_angle(0);
     intake.spin(forward);
     chassis.drive_distance(6);
-    wait(500, msec);
+    wait(200, msec);
     delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
 
     // Ring 2
-    wait(500, msec);
-    chassis.left_swing_to_angle(60);
+    wait(300, msec);
+    chassis.turn_to_angle(50);
     intake.spin(forward);
-    chassis.drive_distance(12.5);
-    // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
+    chassis.drive_distance(13);
     wait(1000, msec);
 
     // Rings 3,4,5
+    chassis.drive_distance(-3.2);
     intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
-    chassis.drive_distance(-3.8);
-    wait(200, msec);
+    wait(600, msec);
     chassis.set_turn_exit_conditions(0.5, 150, 1500);
     chassis.turn_to_angle(180);
-    chassis.drive_max_voltage = 5;
-    chassis.drive_distance(17);
+    setDefaultConstants();
+    chassis.drive_max_voltage = 4;
+    chassis.drive_distance(16.3);
+    setDefaultConstants();
     wait(1000, msec);
+    intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
 
     // Ring 6
-    intake.stop();
     chassis.drive_distance(-8);
     chassis.turn_to_angle(140);
     intake.forward();
     chassis.drive_distance(4);
-    wait(1000, msec);
+    wait(750, msec);
 
     // Drop Mogo
     chassis.turn_to_angle(-10);
     intake.backward();
-    chassis.drive_distance(-5.5);
     Clamp.toggle();
+    chassis.drive_distance(-5.5);
 
     // Travel to 2nd Mogo
+    setDefaultConstants();
     chassis.turn_to_angle(-45);
-    chassis.drive_distance(3.25);
+    chassis.drive_distance(3);
     intake.stop();
-    wait(1000, msec);
-    chassis.turn_to_angle(-90);
-    chassis.set_heading_constants(3, 1, 0, 2, 0);
-    chassis.drive_to_pose(midpointX, midpointY - 1, midpointTheta);
+    chassis.turn_to_point(midpointX, midpointY - 1.25);
+    chassis.set_heading_constants(3, 1.3, 0, 2.2, 0);
+    chassis.drive_max_voltage = 8;
+    chassis.drive_to_pose(midpointX, midpointY - 1.25, midpointTheta);
     chassis.turn_to_angle(-90);
     printPosition();
+    chassis.set_turn_exit_conditions(1, 250, 1300);
     chassis.turn_to_angle(90);
+    setDefaultConstants();
 
     // Clamp 2nd Mogo
-    chassis.drive_distance(-4.5);
+    chassis.drive_distance(-5.75);
+    wait(100, msec);
     Clamp.toggle();
 
     // Ring 1
-    chassis.drive_distance(-3);
+    chassis.drive_distance(-1.6);
     chassis.turn_to_angle(0);
     intake.spin(forward);
-    chassis.drive_distance(6);
+    chassis.drive_distance(6.3);
     wait(500, msec);
     delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
 
     // Ring 2
     wait(500, msec);
-    chassis.right_swing_to_angle(-61);
+    // chassis.set_swing_constants(5, 2, .0, 5, 15);
+    chassis.turn_to_angle(-48);
     intake.spin(forward);
-    chassis.drive_distance(12.5);
-    // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-    wait(1000, msec);
+    chassis.drive_distance(13);
+    wait(750, msec);
 
     // Rings 3,4,5
+    chassis.drive_distance(-3);
     intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
-    chassis.drive_distance(-3.8);
     wait(200, msec);
-    chassis.set_turn_exit_conditions(0.5, 150, 1500);
-    chassis.turn_to_angle(180);
-    chassis.drive_max_voltage = 5;
-    chassis.drive_distance(17);
-    wait(1000, msec);
+    chassis.set_turn_exit_conditions(0.5, 300, 1700);
+    chassis.turn_to_angle(183);
+    chassis.drive_max_voltage = 4;
+    chassis.drive_distance(16.5);
+    setDefaultConstants();
+    wait(750, msec);
 
     // Ring 6
     intake.stop();
     chassis.drive_distance(-8);
-    chassis.turn_to_angle(-140);
+    chassis.turn_to_angle(-137);
     intake.forward();
-    chassis.drive_distance(4);
+    chassis.drive_distance(5);
     wait(1000, msec);
 
     // Drop Mogo
-    chassis.turn_to_angle(13);
+    chassis.turn_to_angle(20);
     intake.backward();
-    chassis.drive_distance(-3);
     Clamp.toggle();
+    chassis.drive_distance(-5);
     intake.stop();
 
-    // Travel to 3rd Mogo
-    chassis.turn_to_angle(30);
-    chassis.drive_distance(30);
-};
-
-/*
-void skills() {
-    chassis.drive_stop(hold);
-
-    vex::thread delayedIntakeStopThread;
-    vex::thread intakePulseReverseThread;
-
-    intake.forward();
-    wait(700, msec);
-    intake.stop();
-    Lift.returnToDefaultPosition(false);
-
-    // Mogo
-    chassis.drive_distance(4.75);
-    chassis.turn_to_angle(-90);
-    chassis.drive_distance(-6);
-    Clamp.toggle();
-
-    // Ring 1
-    chassis.drive_distance(-3);
-    chassis.turn_to_angle(0);
-    intake.forward();
-    chassis.drive_distance(6);
-    wait(200, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 2
-    wait(700, msec);
-    chassis.left_swing_to_angle(60);
-    intake.forward();
-    chassis.drive_max_voltage = 9;
-    chassis.drive_distance(12);
-    chassis.drive_max_voltage = 11;
-    wait(200, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 3
-    wait(300, msec);
-    chassis.right_swing_to_angle(160);
-    chassis.drive_max_voltage = 8;
-    intake.forward();
-    chassis.drive_distance(7);
-    wait(400, msec);
-    intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
-    // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 4
-    chassis.right_swing_to_angle(160);
-    intake.forward();
-    chassis.drive_distance(6.3);
-    wait(600, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 5 & 6
-    chassis.drive_max_voltage = 7;
-    chassis.drive_distance(-6.5);
-    chassis.turn_to_angle(185);
-    intake.forward();
-    chassis.drive_distance(7);
-    wait(200, msec);
-    chassis.drive_distance(5);
-    // intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
-    wait(600, msec);
-    chassis.drive_distance(-3);
-    wait(150, msec);
-    chassis.turn_to_angle(-45);
-    chassis.drive_distance(-4.8);
-    Clamp.toggle();
-    intake.stop();
-
-    return;
-
-    // Long Distance Travel
-    chassis.heading_kd = 0.9;
-    chassis.turn_settle_time = 400;
-    chassis.turn_settle_error = 0.25;
-    chassis.turn_kd = 1;
-    intake.forward();
-    chassis.drive_distance(5.3);
-    chassis.drive_stop(hold);
-    chassis.turn_to_point(8, 1);
-    intake.stop();
-    chassis.drive_to_pose(8, 1, -91);
-    chassis.drive_stop(hold);
-    chassis.turn_to_point(4, 1);
-    chassis.drive_to_pose(4, 1, -91);
-    chassis.drive_stop(hold);
-
-    chassis.turn_timeout = 1500;
-    chassis.turn_to_angle(90);
-    chassis.drive_distance(-7.5);
-    chassis.drive_distance(0.5);
-    Clamp.toggle();
-
-    setDefaultConstants();
-    chassis.turn_settle_error = 0.25;
-
-    // Ring 1
-    // chassis.drive_distance(-1);
-    chassis.turn_to_angle(0);
-    intake.forward();
-    chassis.drive_distance(6);
-    wait(200, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 2
-    wait(700, msec);
-    chassis.right_swing_to_angle(-58);
-    intake.forward();
-    chassis.drive_max_voltage = 9;
-    chassis.drive_distance(12);
-    chassis.drive_max_voltage = 11;
-    wait(200, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 3
-    wait(300, msec);
-    chassis.left_swing_to_angle(-160);
-    chassis.drive_max_voltage = 8;
-    intake.forward();
-    chassis.drive_distance(7);
-    wait(400, msec);
-    // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 4
-    chassis.left_swing_to_angle(-160);
-    intake.forward();
-    chassis.drive_distance(6.3);
-    wait(600, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 5 & 6
-    chassis.drive_max_voltage = 7;
-    chassis.drive_distance(-6.5);
-    chassis.turn_to_angle(-190);
-    intake.forward();
-    chassis.drive_distance(7);
-    wait(100, msec);
-    chassis.drive_distance(5);
-    intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
-    wait(600, msec);
-    chassis.drive_distance(-2);
-    wait(150, msec);
-    chassis.turn_to_angle(47);
-    chassis.drive_distance(-4.8);
-    Clamp.toggle();
-    intake.stop();
-    chassis.drive_distance(5.3);
-};
-*/
-
-/*
-void skills() {
-    chassis.drive_stop(hold);
-
-    vex::thread intakePulseReverseThread;
-    vex::thread delayedIntakeStopThread;
-    vex::thread intakeBurst;
-
-    // Alliance Stake
-    intake.forward();
-    wait(800, msec);
-    intake.stop();
-    Lift.returnToDefaultPosition(true);
-
-    // Mogo
-    chassis.drive_distance(4.5);
-    chassis.turn_to_angle(-90);
-    chassis.drive_distance(-6.5);
-    Clamp.toggle();
-
-    // Ring 1
-    chassis.drive_distance(-3);
-    chassis.turn_to_angle(0);
-    intake.spin(forward);
-    chassis.drive_distance(6);
-    wait(500, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Ring 2
-    wait(500, msec);
-    chassis.left_swing_to_angle(58);
-    intake.spin(forward);
-    // chassis.drive_max_voltage = 9;
-    chassis.drive_distance(12);
-    // chassis.drive_max_voltage = 11;
-    wait(900, msec);
-    // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-
-    // Rings 3,4,5
-    intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
-    chassis.drive_distance(-3.6);
-    // intake.spin(forward);
-    // intake.stop();
-    wait(200, msec);
-    chassis.turn_to_angle(180);
-    // intake.forward();
-    chassis.drive_max_voltage = 4;
-    // intake.spin(forward);
-    chassis.drive_distance(17);
-
-    // intake.forward();
-    wait(700, msec);
-    // intakePulseReverseThread = vex::thread(intakePulseReverseThreadF);
-    chassis.drive_max_voltage = 10;
-
-    // Ring 6
-    chassis.turn_to_angle(55);
-    // intake.forward();
+    // Travel To Hang
+    chassis.turn_to_angle(60);
     chassis.drive_distance(4);
-    wait(600, msec);
-    // intake.forward();
-
-    // Drop Mogo
-    // chassis.drive_distance(2);
-    chassis.turn_to_angle(-27);
-    // chassis.turn_to_angle(35);
-    intake.spin(forward);
-    wait(200, msec);
-    delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-    // intake.spin(reverse);
-    // wait(200, msec);
-    // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-    chassis.drive_distance(-2);
-    Clamp.toggle();
-
-    chassis.drive_max_voltage = 11;
-
-    // Ring 7
-    chassis.drive_distance(1);
-    chassis.turn_to_angle(2);
-    // chassis.drive_distance(6);
-    // chassis.turn_to_angle(-2);
-    // intake.spin(forward);
-    // wait(100, msec);
-    chassis.drive_distance(28);
-    // wait(600, msec);
-    intakeBurst = vex::thread(intakeBurstF);
-    // intake.spin(forward);
-    // wait(50, msec);
-    // intake.stop();
-    // chassis.drive_distance(7);
-
-    // Mogo
-    chassis.turn_to_angle(156);
-    wait(300, msec);
+    chassis.turn_to_angle(-135);
+    Hang.toggle();
+    chassis.drive_distance(-22);
+    wait(1000, msec);
+    chassis.drive_distance(8);
+    chassis.turn_to_angle(-135);
     chassis.drive_distance(-13);
-    Clamp.toggle();
-    // chassis.turn_to_angle(-90);
-    // chassis.drive_distance(-18);
-    // Clamp.toggle();
-
-    // Score Mogo
-    Knocker.toggle();
-    wait(200, msec);
-    chassis.turn_to_angle(67);
-    chassis.drive_distance(10);
-    chassis.drive_stop(brake);
-    chassis.turn_to_angle(220);
-    // chassis.turn_to_angle(-270);
-}
-*/
+};

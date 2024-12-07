@@ -45,27 +45,19 @@ bool Intake::launchRingIfNeeded() {
 };
 
 void Intake::search() {
-    intake.state = SEARCHING;
-    while (intake.state == SEARCHING) {
-        auto rgb = intake.colorSensor.getRgb();
+    // intake.state = ISEARCHING;
+    // while (intake.state == ISEARCHING) {
+    //     auto rgb = intake.colorSensor.getRgb();
 
-        std::cout << rgb.red << std::endl;
+    //     std::cout << rgb.red << std::endl;
 
-        if (rgb.red > 200 || rgb.blue > 200) {
-            intake.stop();
-            intake.state = OFF;
-        }
+    //     if (rgb.red > 200 || rgb.blue > 200) {
+    //         intake.stop();
+    //         intake.state = OFF;
+    //     }
 
-        wait(20, msec);
-    };
-};
-
-void LiftMotor::score() {
-    this->spinToRelativePosition(100, true);
-    intake.forward();
-    this->spinToRelativePosition(200, true);
-    this->returnToDefaultPosition(true);
-    intake.stop();
+    //     wait(20, msec);
+    // };
 };
 
 Intake intake(vex::PORT18, true, vex::PORT10);
@@ -76,30 +68,30 @@ Piston Hang(pneumatics(Brain.ThreeWirePort.B), false);
 Piston Knocker(pneumatics(Brain.ThreeWirePort.A), false);
 
 void intakeSearchingThreadF() {
-    intake.colorSensor.setLightPower(100);
+    // intake.colorSensor.setLightPower(100);
 
-    const float startingSystemTime = vex::timer::system();
+    // const float startingSystemTime = vex::timer::system();
 
-    while (1) {
-        // if (intake.launchRingIfNeeded()) {
-        //     continue;
-        // }
+    // while (1) {
+    //     // if (intake.launchRingIfNeeded()) {
+    //     //     continue;
+    //     // }
 
-        if (!chassis.Gyro.installed()) {
-            std::cout << "IMU Not Installed: " << (vex::timer::system() - startingSystemTime) / 1000 << std::endl;
-        };
+    //     if (!chassis.Gyro.installed()) {
+    //         std::cout << "IMU Not Installed: " << (vex::timer::system() - startingSystemTime) / 1000 << std::endl;
+    //     };
 
-        if (intake.state == SEARCHING) {
-            intake.colorSensor.setLightPower(100);
-            intake.setStopping(hold);
-            intake.forward(55);
-            Lift.returnToDefaultPosition(true);
+    //     if (intake.state == SEARCHING) {
+    //         intake.colorSensor.setLightPower(100);
+    //         intake.setStopping(hold);
+    //         intake.forward(55);
+    //         // Lift.returnToDefaultPosition(true);
 
-            intake.search();
+    //         intake.search();
 
-            intake.colorSensor.setLightPower(100);
-        }
+    //         intake.colorSensor.setLightPower(100);
+    //     }
 
-        wait(10, msec);
-    }
+    //     wait(10, msec);
+    // }
 };

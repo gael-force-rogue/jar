@@ -7,8 +7,8 @@ void blue_awp() {
 
     // Score Alliance
     Lift.resetPosition();
-    chassis.turn_to_angle(-53);
-    chassis.drive_distance(2.75);
+    chassis.turn_to_angle(-53.5);
+    chassis.drive_distance(3);
     Lift.spinToRelativePosition(330, false);
 
     // Clamp
@@ -16,8 +16,11 @@ void blue_awp() {
     chassis.drive_distance(-2);
     chassis.turn_to_angle(-75);
     Lift.stop(coast);
+    chassis.drive_max_voltage = 10;
+    chassis.drive_kd = 17;
     chassis.drive_distance(-10);
     Clamp.toggle();
+    setDefaultConstants();
     // chassis.drive_distance(-0.5);
 
     // 1st Ring
@@ -39,7 +42,7 @@ void blue_awp() {
     chassis.drive_distance(4);
     intake.forward();
     chassis.right_swing_to_angle(-262);
-    chassis.drive_distance(1.25);
+    chassis.drive_distance(2);
     wait(500, msec);
     // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
 
@@ -47,7 +50,7 @@ void blue_awp() {
     chassis.drive_distance(-3);
     chassis.turn_to_angle(0);
     Lift.spinToPosition(240, deg, false);
-    chassis.drive_distance(11);
+    chassis.drive_distance(10.2);
     Lift.stop(coast);
     intake.stop(coast);
 };

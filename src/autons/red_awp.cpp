@@ -3,21 +3,25 @@
 #include "vex.h"
 
 void red_awp() {
-    vex::thread delayedIntakeStopThread;
+    // vex::thread delayedIntakeStopThread;
 
     // Score Alliance
     Lift.resetPosition();
-    chassis.turn_to_angle(52);
+    chassis.turn_to_angle(51.75);
     chassis.drive_distance(2.6);
     Lift.spinToRelativePosition(320, false);
 
     // Clamp
     wait(600, msec);
     chassis.drive_distance(-1.85);
-    chassis.turn_to_angle(75);
+    chassis.turn_to_angle(77);
     Lift.stop(coast);
-    chassis.drive_distance(-10.5);
+    chassis.drive_timeout = 2000;
+    chassis.drive_max_voltage = 10;
+    chassis.drive_kd = 17;
+    chassis.drive_distance(-10.2);
     Clamp.toggle();
+    setDefaultConstants();
 
     // 1st Ring
     chassis.turn_to_angle(180);
@@ -26,14 +30,14 @@ void red_awp() {
     // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
 
     // 2nd Ring
-    chassis.turn_to_angle(262);
+    chassis.turn_to_angle(270);
     intake.forward();
-    chassis.drive_distance(5);
+    chassis.drive_distance(5.1);
     // delayedIntakeStopThread = vex::thread(delayedIntakeStopThreadF);
-    wait(300, msec);
+    wait(400, msec);
 
     // 3rd Ring
-    chassis.drive_distance(-4);
+    chassis.drive_distance(-4.1);
     chassis.turn_to_angle(230);
     chassis.drive_distance(3.7);
     intake.forward();
@@ -46,7 +50,7 @@ void red_awp() {
     chassis.drive_distance(-3);
     chassis.turn_to_angle(0);
     Lift.spinToPosition(240, deg, false);
-    chassis.drive_distance(10.5);
+    chassis.drive_distance(11);
     Lift.stop(coast);
     intake.stop(coast);
 };

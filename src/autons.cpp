@@ -16,7 +16,7 @@ void setDefaultConstants() {
 
         // Each exit condition set is in the form of (settle_error, settle_time, timeout).
         chassis.set_drive_exit_conditions(1.5, 200, 2500);
-        chassis.set_turn_exit_conditions(1, 200, 1000);
+        chassis.set_turn_exit_conditions(1, 150, 1000);
         chassis.set_swing_exit_conditions(1, 300, 600);
     } else {
         // Each constant set is in the form of (maxVoltage, kP, kI, kD, startI).
@@ -31,8 +31,8 @@ void setDefaultConstants() {
 
         // Each exit condition set is in the form of (settle_error, settle_time, timeout).
         chassis.set_drive_exit_conditions(1.5, 200, 4000);
-        chassis.set_turn_exit_conditions(1.5, 150, 1000);
-        chassis.set_swing_exit_conditions(1, 300, 1000);
+        chassis.set_turn_exit_conditions(1.3, 150, 1300);
+        chassis.set_swing_exit_conditions(1, 300, 1500);
     };
 
     if (AUTON == RED_MOGORUSH || AUTON == BLUE_MOGORUSH) {
@@ -89,19 +89,25 @@ void disconnectThreadF() {
         if (!intake.installed()) {
             std::cout << "Intake Not Installed" << std::endl;
         };
-        wait(50, msec);
+        wait(10, msec);
     };
 };
 
+void liftToggleThreadF() {
+    Lift.cycle();
+}
 void runAuton(Auton auton) {
     setDefaultConstants();
     chassis.set_coordinates(0, 0, 0);
+
     intake.resetPosition();
-    Lift.resetPosition();
     intake.setVelocity(100, percent);
+    intake.setStopping(coast);
+
+    Lift.resetPosition();
     Lift.setVelocity(100, percent);
-    intake.setStopping(hold);
-    Lift.returnToDefaultPosition(false);
+
+    // Lift.returnToDefaultPosition(false);
 
     // vex::thread intakeSearchingThread(intakeSearchingThreadF);
     vex::thread disconnectThread(disconnectThreadF);
@@ -109,7 +115,6 @@ void runAuton(Auton auton) {
     vex::timer autonTimer;
     switch (auton) {
         case RED_AWP:
-            std::cout << "Running Red AWP" << std::endl;
             red_awp();
             break;
         case BLUE_AWP:

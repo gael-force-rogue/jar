@@ -109,13 +109,9 @@ bool auton_started = false;
 
 void autonomous(void) {
     auton_started = true;
+    logAuton();
     runAuton(AUTON);
 }
-
-void liftScoringThreadF() {
-    Lift.score();
-    intake.state = OFF;
-};
 
 void hangThreadF() {
     while (1) {
@@ -125,7 +121,13 @@ void hangThreadF() {
             }
             Hang.toggle();
             Knocker.close();
-        }
+        };
+        if (Controller.ButtonUp.pressing()) {
+            while (Controller.ButtonUp.pressing()) {
+                wait(10, msec);
+            };
+            Lift.cycle();
+        };
         wait(20, msec);
     };
 }
@@ -142,23 +144,17 @@ void usercontrol(void) {
     while (1) {
         chassis.control_arcade();
 
+        // Lift Manual Interrupt
         if (Controller.ButtonL1.pressing()) {
-            intake.state = OFF;
+            Lift.state = LiftState::STANDBY;
+            Lift.controlled = false;
             Lift.forward();
         } else if (Controller.ButtonL2.pressing()) {
-            intake.state = OFF;
+            Lift.state = LiftState::STANDBY;
+            Lift.controlled = false;
             Lift.backward();
-        } else if (Controller.ButtonLeft.pressing()) {
-            intake.state = SEARCHING;
-        } else if (Controller.ButtonUp.pressing()) {
-            intake.state = SCORING;
-            vex::thread liftScoringThread(liftScoringThreadF);
-        } else if (intake.state == OFF) {
-            if (Lift.relativePosition() > Lift.defaultPosition && Lift.relativePosition() < 180) {
-                Lift.returnToDefaultPosition(false);
-            } else {
-                Lift.stop();
-            }
+        } else if (Lift.state == LiftState::STANDBY && !Lift.controlled) {
+            Lift.stop();
         };
 
         // Clamp
@@ -192,7 +188,7 @@ void usercontrol(void) {
         } else if (Controller.ButtonR1.pressing()) {
             manualIntakeInterrupt = true;
             intake.backward();
-        } else if (intake.state == OFF || manualIntakeInterrupt) {
+        } else if (intake.state == IOFF || manualIntakeInterrupt) {
             manualIntakeInterrupt = false;
             intake.stop();
         }
@@ -204,6 +200,7 @@ void usercontrol(void) {
 int main() {
     Competition.autonomous(autonomous);
     Competition.drivercontrol(usercontrol);
+    logAuton();
 
     if (Brain.Battery.capacity() < 15) {
         Controller.rumble("-.-.-");
